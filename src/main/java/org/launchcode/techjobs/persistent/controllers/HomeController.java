@@ -1,5 +1,6 @@
 package org.launchcode.techjobs.persistent.controllers;
 
+import org.launchcode.techjobs.persistent.models.Employer;
 import org.launchcode.techjobs.persistent.models.Job;
 import org.launchcode.techjobs.persistent.models.Skill;
 import org.launchcode.techjobs.persistent.models.data.EmployerRepository;
@@ -30,6 +31,9 @@ public class HomeController {
     public String index(Model model) {
 
         model.addAttribute("title", "My Jobs");
+        model.addAttribute("jobs",jobRepository.findAll());
+        model.addAttribute("employers",employerRepository.findAll());
+        model.addAttribute("skills",skillRepository.findAll());
 
         return "index";
     }
@@ -54,21 +58,28 @@ public class HomeController {
         model.addAttribute("employer",employerRepository.findById(employerId));
         List<Skill> skillObjs = (List<Skill>) skillRepository.findAllById(skills);
         newJob.setSkills(skillObjs);
+
+
+        Optional<Employer> optEmployer = employerRepository.findById(employerId);
+        if (optEmployer.isPresent()) {
+            Employer employer = (Employer) optEmployer.get();
+            newJob.setEmployer(employer);
+        }
         jobRepository.save(newJob);
         return "redirect:";
     }
 
     @GetMapping("view/{jobId}")
     public String displayViewJob(Model model, @PathVariable int jobId) {
-
         Optional<Job> optJob = jobRepository.findById(jobId);
         if (optJob.isPresent()) {
-            Job job= (Job) optJob.get();
+            Job job = (Job) optJob.get();
             model.addAttribute("job", job);
-            return "jobs/view";
+            return "view";
         } else {
             return "redirect:../";
         }
-    }
 
+
+    }
 }

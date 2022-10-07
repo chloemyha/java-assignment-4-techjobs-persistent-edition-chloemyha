@@ -2,12 +2,16 @@ package org.launchcode.techjobs.persistent.controllers;
 
 import org.launchcode.techjobs.persistent.models.Job;
 import org.launchcode.techjobs.persistent.models.JobData;
+import org.launchcode.techjobs.persistent.models.data.EmployerRepository;
 import org.launchcode.techjobs.persistent.models.data.JobRepository;
+import org.launchcode.techjobs.persistent.models.data.SkillRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import static org.launchcode.techjobs.persistent.controllers.ListController.columnChoices;
 
@@ -20,8 +24,12 @@ public class SearchController {
 
     @Autowired
     private JobRepository jobRepository;
+    @Autowired
+    private EmployerRepository employerRepository;
+    @Autowired
+    private SkillRepository skillRepository;
 
-    @RequestMapping("")
+    @GetMapping(value = "")
     public String search(Model model) {
         model.addAttribute("columns", columnChoices);
         return "search";
@@ -32,12 +40,17 @@ public class SearchController {
         Iterable<Job> jobs;
         if (searchTerm.toLowerCase().equals("all") || searchTerm.equals("")){
             jobs = jobRepository.findAll();
+            model.addAttribute("employers",employerRepository.findAll());
+            model.addAttribute("skills",skillRepository.findAll());
+
         } else {
             jobs = JobData.findByColumnAndValue(searchType, searchTerm, jobRepository.findAll());
+
         }
         model.addAttribute("columns", columnChoices);
         model.addAttribute("title", "Jobs with " + columnChoices.get(searchType) + ": " + searchTerm);
         model.addAttribute("jobs", jobs);
+
 
         return "search";
     }
